@@ -26,11 +26,21 @@ module RSpec
       end
 
       description do
-        "equal #{"#{expected.to_source}"}"
+        "equal #{description_of(expected)}"
+      end
+
+      def description_of(object)
+        Support::ObjectFormatter.format(source(object))
       end
 
       private
 
+      def source(proc)
+        source = proc.to_source
+        proc.lambda? ? source.sub('proc ', '-> ') : source
+      end
     end
   end
 end
+
+# TODO: handle procs where source extraction fails

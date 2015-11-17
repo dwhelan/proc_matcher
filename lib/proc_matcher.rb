@@ -11,9 +11,9 @@ module ProcHelper
 
     def_delegators :@proc, :arity, :lambda?
 
-    def initialize(proc)
-      @proc = proc
-      @sexp = proc.to_sexp
+    def initialize(proc, sexp=proc.to_sexp)
+      @proc = proc.dup
+      @sexp = sexp
     end
 
     def body
@@ -26,6 +26,15 @@ module ProcHelper
 
     def parameters
       sexp[2].sexp_body.to_a
+    end
+
+    def with_parameters_from(proc)
+      sexp = self.sexp
+      proc.parameters.each_with_index do |param, index|
+        sexp = sexp.gsub Sexp.new(:lvar, parameters[index]), Sexp.new(:lvar, param)
+        sexp[2][index + 1] = param
+      end
+      ProcSexp.new(proc, sexp)
     end
 
     def to_s
@@ -45,14 +54,9 @@ module RSpec
         return true if expected_proc.body == actual_proc.body
         return false if expected_proc.count != actual_proc.count
 
-        p2_params = actual_proc.parameters
+        actual_proc2 = actual_proc.with_parameters_from(expected_proc)
 
-        expected_proc.parameters.each_with_index do |param, index|
-          actual_proc.sexp[2][index + 1] = param
-          actual_proc.sexp = actual_proc.sexp.gsub Sexp.new(:lvar, p2_params[index]), Sexp.new(:lvar, param)
-        end
-
-        expected_proc.sexp == actual_proc.sexp
+        expected_proc.sexp == actual_proc2.sexp
       end
 
       def actual_proc
@@ -74,7 +78,6 @@ module RSpec
       def failure_message_when_negated
         %Q(expected "#{actual_proc}" not to equal "#{expected_proc}")
       end
-
     end
   end
 end

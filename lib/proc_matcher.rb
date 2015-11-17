@@ -7,15 +7,13 @@ module ProcHelper
     extend Forwardable
 
     attr_reader :proc
+    attr_accessor :sexp
 
-    def_delegators :@proc, :arity, :lambda?, :to_sexp
+    def_delegators :@proc, :arity, :lambda?
 
     def initialize(proc)
-      @proc = proc.dup
-    end
-
-    def sexp
-      @sexp ||= proc.to_sexp
+      @proc = proc
+      @sexp = proc.to_sexp
     end
 
     def body
@@ -28,6 +26,11 @@ module ProcHelper
 
     def parameters
       sexp[2].sexp_body.to_a
+    end
+
+    def to_s
+      source = proc.to_source
+      proc.lambda? ? source.sub('proc ', '-> ') : source
     end
   end
 end
@@ -45,11 +48,11 @@ module RSpec
         p2_params = actual_proc.parameters
 
         expected_proc.parameters.each_with_index do |param, index|
-          self.actual_sexp[2][index + 1] = param
-          self.actual_sexp = actual_sexp.gsub Sexp.new(:lvar, p2_params[index]), Sexp.new(:lvar, param)
+          actual_proc.sexp[2][index + 1] = param
+          actual_proc.sexp = actual_proc.sexp.gsub Sexp.new(:lvar, p2_params[index]), Sexp.new(:lvar, param)
         end
 
-        expected_sexp == self.actual_sexp
+        expected_proc.sexp == actual_proc.sexp
       end
 
       def actual_proc
@@ -61,27 +64,17 @@ module RSpec
       end
 
       description do
-        "equal #{description_of(expected)}"
+        %Q(equal "#{expected_proc}")
       end
 
-      def description_of(object)
-        Support::ObjectFormatter.format(source(object))
+      def failure_message
+        %Q(expected "#{actual_proc}" to equal "#{expected_proc}")
       end
 
-      attr_writer :actual_sexp
-
-      def actual_sexp
-        @actual_sexp ||= actual.dup.to_sexp
+      def failure_message_when_negated
+        %Q(expected "#{actual_proc}" not to equal "#{expected_proc}")
       end
 
-      def expected_sexp
-        @expected_sexp ||= expected.to_sexp
-      end
-
-      def source(proc)
-        source = proc.to_source
-        proc.lambda? ? source.sub('proc ', '-> ') : source
-      end
     end
   end
 end

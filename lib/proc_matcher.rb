@@ -1,24 +1,63 @@
 require 'proc_matcher/version'
 require 'rspec/matchers'
 
+module ProcHelper
+
+  class ProcSexp
+    extend Forwardable
+
+    attr_reader :proc
+
+    def_delegators :@proc, :arity, :lambda?, :to_sexp
+
+    def initialize(proc)
+      @proc = proc.dup
+    end
+
+    def sexp
+      @sexp ||= proc.to_sexp
+    end
+
+    def body
+      sexp.sexp_body
+    end
+
+    def count
+      sexp.count
+    end
+
+    def parameters
+      sexp[2].sexp_body.to_a
+    end
+  end
+end
+
 module RSpec
   module Matchers
     define(:equal_proc) do
       match do
-        return false if actual.arity   != expected.arity
-        return false if actual.lambda? != expected.lambda?
+        return false if actual_proc.arity   != expected_proc.arity
+        return false if actual_proc.lambda? != expected_proc.lambda?
 
-        return true if expected_sexp.sexp_body == actual_sexp.sexp_body
-        return false if expected_sexp.count != actual_sexp.count
+        return true if expected_proc.body == actual_proc.body
+        return false if expected_proc.count != actual_proc.count
 
-        p2_params = actual_sexp[2].sexp_body.to_a
+        p2_params = actual_proc.parameters
 
-        parameters(expected_sexp).each_with_index do |param, index|
+        expected_proc.parameters.each_with_index do |param, index|
           self.actual_sexp[2][index + 1] = param
           self.actual_sexp = actual_sexp.gsub Sexp.new(:lvar, p2_params[index]), Sexp.new(:lvar, param)
         end
 
         expected_sexp == self.actual_sexp
+      end
+
+      def actual_proc
+        @acutal_proc ||= ProcHelper::ProcSexp.new(actual)
+      end
+
+      def expected_proc
+        @expected_proc ||= ProcHelper::ProcSexp.new(expected)
       end
 
       description do
@@ -37,10 +76,6 @@ module RSpec
 
       def expected_sexp
         @expected_sexp ||= expected.to_sexp
-      end
-
-      def parameters(sexp)
-        sexp[2].sexp_body.to_a
       end
 
       def source(proc)

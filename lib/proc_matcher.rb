@@ -25,9 +25,9 @@ module RSpec
         s1 == s2
       end
 
-      # description do
-      #   "#{"#{actual.to_source}"} should equal #{"#{expected.to_source}"}"
-      # end
+      description do
+        "equal #{"#{expected.to_source}"}"
+      end
 
       private
 

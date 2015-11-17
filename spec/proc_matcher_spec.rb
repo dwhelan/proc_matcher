@@ -104,15 +104,23 @@ describe ProcMatcher do
     expect(p1).to_not equal_proc(p2)
   end
 
-  specify 'description' do
-    match = equal_proc proc { |b| }
-    match.matches? proc { |a| }
-    expect(match.description).to eq 'proc { |a| } should equal proc { |b| }'
-  end
+  describe 'description' do
+    it 'with no args should be "equal proc { }"' do
+      expect(equal_proc(proc { }).description).to eq 'equal proc { }'
+    end
 
-  specify 'negated description' do
-    match = equal_proc proc { |b| }
-    match.matches? proc { |a| }
-    expect(match.description).to eq 'proc { |a| } should equal proc { |b| }'
+    it 'with arguments "arg" should be "equal proc { |arg| }"' do
+      expect(equal_proc(proc { |arg| }).description).to eq 'equal proc { |arg| }'
+    end
+
+    it 'with arguments "arg" and body "arg.to_s" should be "equal proc { |arg| arg.to_s }"' do
+      expect(equal_proc(proc { |arg| arg.to_s }).description).to eq 'equal proc { |arg| arg.to_s }'
+    end
+
+    it 'with arguments "arg1, *arg2" should be "equal proc { |arg1, *arg2| }"' do
+      expect(equal_proc(proc { |arg1, *arg2| }).description).to eq 'equal proc { |arg1, *arg2| }'
+    end
+
+
   end
 end

@@ -6,6 +6,7 @@ class ProcSource
   attr_reader :proc
 
   def initialize(proc)
+    fail ArgumentError, 'argument must be a Proc' unless proc.is_a?(Proc)
     @proc = proc
   end
 
@@ -61,7 +62,6 @@ class ProcSource
   end
 end
 
-# TODO: handle intialize with a non Proc
 # TODO: add alias for to_source => to_s
 # TODO: add source
 # TODO: handle proc being passed as a block rather than a parameter

@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe ProcSource do
+  describe 'initialize' do
+    it 'should throw if argument is not a proc' do
+      expect { ProcSource.new Object.new }.to raise_error ArgumentError, 'argument must be a Proc'
+    end
+  end
+
   describe 'to_s' do
     it 'should delegate "to_s" to "proc.to_source"' do
       source = ProcSource.new proc {}

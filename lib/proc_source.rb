@@ -5,9 +5,13 @@ class ProcSource
 
   attr_reader :proc
 
-  def initialize(proc)
-    fail ArgumentError, 'argument must be a Proc' unless proc.is_a?(Proc)
-    @proc = proc
+  def initialize(proc = nil, &block)
+    if proc
+      fail ArgumentError, 'cannot pass both an argument and a block' if block
+      fail ArgumentError, 'argument must be a Proc'                  unless proc.is_a?(Proc)
+    end
+
+    @proc = proc || block
   end
 
   def sexp
@@ -62,9 +66,9 @@ class ProcSource
   end
 end
 
+# TODO: support symbol procs
 # TODO: add alias for to_source => to_s
 # TODO: add source
-# TODO: handle proc being passed as a block rather than a parameter
 # TODO: handle procs where source extraction fails
 # TODO: handle bindings and local variable checks
 # TODO: handle @variables?

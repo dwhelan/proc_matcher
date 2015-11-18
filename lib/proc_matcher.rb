@@ -1,46 +1,57 @@
 require 'proc_matcher/version'
 require 'rspec/matchers'
 
-module ProcHelper
+class ProcDescriptor
+  extend Forwardable
 
-  class ProcSexp
-    extend Forwardable
+  attr_reader :proc
+  attr_accessor :sexp
 
-    attr_reader :proc
-    attr_accessor :sexp
+  def_delegators :@proc, :arity, :lambda?, :to_source
 
-    def_delegators :@proc, :arity, :lambda?
+  def initialize(proc, sexp=proc.to_sexp)
+    @proc = proc
+    @sexp = sexp
+  end
 
-    def initialize(proc, sexp=proc.to_sexp)
-      @proc = proc.dup
-      @sexp = sexp
+  def to_s
+    lambda? ? to_source.sub('proc ', '-> ') : to_source
+  end
+
+  def ==(other)
+    return false if other.arity != arity || other.lambda? != lambda? || other.count != count
+    return true  if other.body == body
+
+    other.sexp == with_parameters_from(other).sexp
+  end
+
+  protected
+
+  def body
+    sexp.sexp_body
+  end
+
+  def count
+    sexp.count
+  end
+
+  def parameters
+    sexp[2].sexp_body.to_a
+  end
+
+  def with_parameters_from(other_proc)
+    sexp = self.sexp
+    other_proc.parameters.each_with_index do |param, index|
+      sexp = rename_parameter(parameters[index], param, sexp)
     end
+    ProcDescriptor.new(proc, sexp)
+  end
 
-    def body
-      sexp.sexp_body
-    end
-
-    def count
-      sexp.count
-    end
-
-    def parameters
-      sexp[2].sexp_body.to_a
-    end
-
-    def with_parameters_from(proc)
-      sexp = self.sexp
-      proc.parameters.each_with_index do |param, index|
-        sexp = sexp.gsub Sexp.new(:lvar, parameters[index]), Sexp.new(:lvar, param)
-        sexp[2][index + 1] = param
-      end
-      ProcSexp.new(proc, sexp)
-    end
-
-    def to_s
-      source = proc.to_source
-      proc.lambda? ? source.sub('proc ', '-> ') : source
-    end
+  def rename_parameter(from, to, sexp)
+    sexp = sexp.gsub Sexp.new(:lvar, from), Sexp.new(:lvar, to)
+    index = parameters.find_index {|parameter| parameter == from }
+    sexp[2][index + 1] = to
+    sexp
   end
 end
 
@@ -48,41 +59,35 @@ module RSpec
   module Matchers
     define(:equal_proc) do
       match do
-        return false if actual_proc.arity   != expected_proc.arity
-        return false if actual_proc.lambda? != expected_proc.lambda?
-
-        return true if expected_proc.body == actual_proc.body
-        return false if expected_proc.count != actual_proc.count
-
-        actual_proc2 = actual_proc.with_parameters_from(expected_proc)
-
-        expected_proc.sexp == actual_proc2.sexp
-      end
-
-      def actual_proc
-        @acutal_proc ||= ProcHelper::ProcSexp.new(actual)
-      end
-
-      def expected_proc
-        @expected_proc ||= ProcHelper::ProcSexp.new(expected)
+        expected_descriptor == actual_descriptor
       end
 
       description do
-        %Q(equal "#{expected_proc}")
+        %Q(equal "#{expected_descriptor}")
       end
 
       def failure_message
-        %Q(expected "#{actual_proc}" to equal "#{expected_proc}")
+        %Q(expected "#{actual_descriptor}" to equal "#{expected_descriptor}")
       end
 
       def failure_message_when_negated
-        %Q(expected "#{actual_proc}" not to equal "#{expected_proc}")
+        %Q(expected "#{actual_descriptor}" not to equal "#{expected_descriptor}")
+      end
+
+      private
+
+      def actual_descriptor
+        @actual_descriptor ||= ProcDescriptor.new(actual)
+      end
+
+      def expected_descriptor
+        @expected_descriptor ||= ProcDescriptor.new(expected)
       end
     end
   end
 end
 
+# TODO: split proc equals logic into its own module
 # TODO: handle procs where source extraction fails
 # TODO: handle proc being passed as a block rather than a parameter
 # TODO: handle bindings
-# TODO: split proc equals logic into its own module

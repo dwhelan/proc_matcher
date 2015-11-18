@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'sourcify'
 
+# rubocop:disable Lint/UnusedBlockArgument, Metrics/ModuleLength, Metrics/LineLength
 module RSpec
-  # rubocop:disable Lint/UnusedBlockArgument
   describe ProcMatcher do
     it 'has a version number' do
       expect(ProcMatcher::VERSION).not_to be nil
@@ -107,11 +107,11 @@ module RSpec
 
     describe 'description' do
       it 'proc with no args should be "equal proc { }"' do
-        expect(equal_proc(proc { }).description).to eq 'equal "proc { }"'
+        expect(equal_proc(proc {}).description).to eq 'equal "proc { }"'
       end
 
       it 'lamda with no args should be "equal -> { }"' do
-        expect(equal_proc(-> { }).description).to eq 'equal "-> { }"'
+        expect(equal_proc(-> {}).description).to eq 'equal "-> { }"'
       end
 
       it 'proc with arguments "arg" should be "equal proc { |arg| }"' do
@@ -132,30 +132,30 @@ module RSpec
         proc1 = proc {}
         proc2 = proc { |arg| }
 
-        expect{expect(proc1).to equal_proc(proc2)}.to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" to equal "proc { |arg| }"')
+        expect { expect(proc1).to equal_proc(proc2) }.to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" to equal "proc { |arg| }"')
       end
 
       it 'when expected is a lambda but is a proc' do
         lambda = -> {}
         proc   = proc {}
 
-        expect{expect(lambda).to equal_proc(proc)}.to raise_error(Expectations::ExpectationNotMetError, 'expected "-> { }" to equal "proc { }"')
+        expect { expect(lambda).to equal_proc(proc) }.to raise_error(Expectations::ExpectationNotMetError, 'expected "-> { }" to equal "proc { }"')
       end
 
       it 'when expected is a proc but is a lambda' do
         lambda = -> {}
         proc   = proc {}
 
-        expect{expect(proc).to equal_proc(lambda)}.to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" to equal "-> { }"')
+        expect { expect(proc).to equal_proc(lambda) } .to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" to equal "-> { }"')
       end
     end
 
     describe 'failure_message_when_negated' do
       it 'when procs differ' do
-        proc1 = proc { }
-        proc2 = proc { }
+        proc1 = proc {}
+        proc2 = proc {}
 
-        expect{expect(proc1).not_to equal_proc(proc2)}.to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" not to equal "proc { }"')
+        expect { expect(proc1).not_to equal_proc(proc2) }.to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" not to equal "proc { }"')
       end
     end
   end

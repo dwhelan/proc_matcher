@@ -9,7 +9,7 @@ class ProcDescriptor
 
   def_delegators :@proc, :arity, :lambda?, :to_source
 
-  def initialize(proc, sexp=proc.to_sexp)
+  def initialize(proc, sexp = proc.to_sexp)
     @proc = proc
     @sexp = sexp
   end
@@ -49,7 +49,7 @@ class ProcDescriptor
 
   def rename_parameter(from, to, sexp)
     sexp = sexp.gsub Sexp.new(:lvar, from), Sexp.new(:lvar, to)
-    index = parameters.find_index {|parameter| parameter == from }
+    index = parameters.find_index { |parameter| parameter == from }
     sexp[2][index + 1] = to
     sexp
   end
@@ -63,15 +63,15 @@ module RSpec
       end
 
       description do
-        %Q(equal "#{expected_descriptor}")
+        %(equal "#{expected_descriptor}")
       end
 
       def failure_message
-        %Q(expected "#{actual_descriptor}" to equal "#{expected_descriptor}")
+        %(expected "#{actual_descriptor}" to equal "#{expected_descriptor}")
       end
 
       def failure_message_when_negated
-        %Q(expected "#{actual_descriptor}" not to equal "#{expected_descriptor}")
+        %(expected "#{actual_descriptor}" not to equal "#{expected_descriptor}")
       end
 
       private

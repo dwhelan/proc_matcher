@@ -2,92 +2,84 @@ require 'proc_matcher/version'
 require 'rspec/matchers'
 
 class ProcDescriptor
+  require 'sourcify'
+
   extend Forwardable
-
-  attr_reader :proc
-  attr_accessor :sexp
-
-  def_delegators :@proc, :arity, :lambda?, :to_source
 
   def initialize(proc, sexp = proc.to_sexp)
     @proc = proc
     @sexp = sexp
   end
 
-  def to_s
-    lambda? ? to_source.sub('proc ', '-> ') : to_source
-  end
-
   def ==(other)
     return false if other.arity != arity || other.lambda? != lambda? || other.count != count
-    return true  if other.body == body
+    return true  if other.sexp_body == sexp_body
 
     other.sexp == with_parameters_from(other).sexp
   end
 
+  def to_source
+    lambda? ? proc.to_source.sub('proc ', '-> ') : proc.to_source
+  end
+
   protected
 
-  def body
-    sexp.sexp_body
-  end
+  attr_reader :proc, :sexp
 
-  def count
-    sexp.count
-  end
+  def_delegators :proc, :arity, :lambda?
+  def_delegators :sexp, :sexp_body, :count
 
   def parameters
     sexp[2].sexp_body.to_a
   end
 
+  private
+
   def with_parameters_from(other_proc)
-    sexp = self.sexp
+    new_sexp = sexp
     other_proc.parameters.each_with_index do |param, index|
-      sexp = rename_parameter(parameters[index], param, sexp)
+      new_sexp = rename_parameter(parameters[index], param, new_sexp)
     end
-    ProcDescriptor.new(proc, sexp)
+    ProcDescriptor.new(proc, new_sexp)
   end
 
   def rename_parameter(from, to, sexp)
-    sexp = sexp.gsub Sexp.new(:lvar, from), Sexp.new(:lvar, to)
+    new_sexp = replace_parameter_references(from, to, sexp)
+    replace_parameter_definition(from, to, new_sexp)
+    new_sexp
+  end
+
+  def replace_parameter_references(from, to, sexp)
+    sexp.gsub(s(:lvar, from), s(:lvar, to))
+  end
+
+  def replace_parameter_definition(from, to, sexp)
     index = parameters.find_index { |parameter| parameter == from }
     sexp[2][index + 1] = to
-    sexp
   end
 end
 
 module RSpec
   module Matchers
     define(:equal_proc) do
-      match do
-        expected_descriptor == actual_descriptor
-      end
+      match { descriptor_for(actual) == descriptor_for(expected) }
 
-      description do
-        %(equal "#{expected_descriptor}")
-      end
+      description { "equal #{description_of(expected)}" }
 
-      def failure_message
-        %(expected "#{actual_descriptor}" to equal "#{expected_descriptor}")
-      end
-
-      def failure_message_when_negated
-        %(expected "#{actual_descriptor}" not to equal "#{expected_descriptor}")
+      def description_of(object)
+        super(descriptor_for(object).to_source)
       end
 
       private
 
-      def actual_descriptor
-        @actual_descriptor ||= ProcDescriptor.new(actual)
-      end
-
-      def expected_descriptor
-        @expected_descriptor ||= ProcDescriptor.new(expected)
+      def descriptor_for(proc)
+        ProcDescriptor.new(proc)
       end
     end
   end
 end
 
-# TODO: split proc equals logic into its own module
+# TODO: split proc equals logic into its own gem
 # TODO: handle procs where source extraction fails
 # TODO: handle proc being passed as a block rather than a parameter
 # TODO: handle bindings

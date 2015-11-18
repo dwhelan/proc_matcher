@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'sourcify'
 
 # rubocop:disable Lint/UnusedBlockArgument, Metrics/ModuleLength, Metrics/LineLength
 module RSpec

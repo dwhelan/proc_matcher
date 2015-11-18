@@ -6,17 +6,17 @@ require 'rspec/matchers'
 module RSpec
   module Matchers
     define(:equal_proc) do
-      match { descriptor_for(actual) == descriptor_for(expected) }
+      match { source_for(actual) == source_for(expected) }
 
       description { "equal #{description_of(expected)}" }
 
       def description_of(object)
-        super(descriptor_for(object).to_s)
+        super(source_for(object).to_s)
       end
 
       private
 
-      def descriptor_for(proc)
+      def source_for(proc)
         ProcSource.new(proc)
       end
     end
@@ -24,3 +24,4 @@ module RSpec
 end
 
 # TODO: split proc equals logic into its own gem
+# TODO: clean p README.md

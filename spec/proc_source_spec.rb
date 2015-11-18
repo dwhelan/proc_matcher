@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ProcSource do
   describe 'to_s' do
-    it 'should delegate "to_so" to "proc.to_source"' do
+    it 'should delegate "to_s" to "proc.to_source"' do
       source = ProcSource.new proc {}
       expect(source.to_s).to be source.proc.to_source
     end
@@ -48,7 +48,7 @@ describe ProcSource do
       expect(source1).to_not eq source2
     end
 
-    specify 'should not be equal with a different number of parameters' do
+    specify 'should not be equal with a different parameter arity' do
       source1 = ProcSource.new proc {}
       source2 = ProcSource.new proc { |a| a.to_s }
 

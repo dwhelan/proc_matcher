@@ -6,9 +6,8 @@ class ProcDescriptor
 
   extend Forwardable
 
-  def initialize(proc, sexp = proc.to_sexp)
+  def initialize(proc)
     @proc = proc
-    @sexp = sexp
   end
 
   def ==(other)
@@ -24,10 +23,14 @@ class ProcDescriptor
 
   protected
 
-  attr_reader :proc, :sexp
+  attr_reader :proc
 
-  def_delegators :proc, :arity, :lambda?
+  def_delegators :proc, :arity,     :lambda?
   def_delegators :sexp, :sexp_body, :count
+
+  def sexp
+    @sexp ||= proc.to_sexp
+  end
 
   def parameters
     sexp[2].sexp_body.to_a
@@ -37,20 +40,16 @@ class ProcDescriptor
 
   def sexp_with_parameters_from(other_proc)
     new_sexp = sexp
-    other_proc.parameters.each_with_index do |param, index|
-      new_sexp = rename_parameter(parameters[index], param, new_sexp)
+    other_proc.parameters.each_with_index do |to, index|
+      from = parameters[index]
+      new_sexp = rename_parameter(from, to, new_sexp)
     end
     new_sexp
   end
 
   def rename_parameter(from, to, sexp)
     new_sexp = replace_parameter_definition(from, to, sexp)
-    new_sexp = replace_parameter_references(from, to, new_sexp)
-    new_sexp
-  end
-
-  def replace_parameter_references(from, to, sexp)
-    sexp.gsub(s(:lvar, from), s(:lvar, to))
+    replace_parameter_references(from, to, new_sexp)
   end
 
   def replace_parameter_definition(from, to, sexp)
@@ -58,6 +57,10 @@ class ProcDescriptor
     index = parameters.find_index { |parameter| parameter == from }
     new_sexp[2][index + 1] = to
     new_sexp
+  end
+
+  def replace_parameter_references(from, to, sexp)
+    sexp.gsub(s(:lvar, from), s(:lvar, to))
   end
 end
 

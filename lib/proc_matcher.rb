@@ -24,4 +24,4 @@ module RSpec
 end
 
 # TODO: split proc equals logic into its own gem
-# TODO: clean p README.md
+# TODO: clean up README.md

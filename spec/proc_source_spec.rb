@@ -87,28 +87,16 @@ describe ProcSource do
 
     describe 'symbol procs' do
       specify 'same symbol procs should be equal' do
-        block = proc(&:to_s)
-        source = ProcSource.new block
+        source = ProcSource.new proc(&:to_s)
 
         expect(source).to eq source
       end
 
       specify 'lexically same symbol procs should be equal' do
-        block1 = proc(&:to_s)
-        block2 = proc(&:to_s)
-        source1 = ProcSource.new block1
-        source2 = ProcSource.new block2
+        source1 = ProcSource.new proc(&:to_s)
+        source2 = ProcSource.new proc(&:to_s)
 
         expect(source1).to eq source2
-      end
-
-      specify 'lexically different symbol procs should not be equal' do
-        block1 = proc(&:to_s)
-        block2 = proc(&:inspect)
-        source1 = ProcSource.new block1
-        source2 = ProcSource.new block2
-
-        expect(source1).to_not eq source2
       end
 
       specify 'lexically same symbol procs should be equal even when declared within different scopes' do
@@ -124,6 +112,13 @@ describe ProcSource do
         source2 = ProcSource.new object2.prc
 
         expect(source1).to eq source2
+      end
+
+      specify 'lexically different symbol procs should not be equal' do
+        source1 = ProcSource.new proc(&:to_s)
+        source2 = ProcSource.new proc(&:inspect)
+
+        expect(source1).to_not eq source2
       end
     end
   end

@@ -96,7 +96,6 @@ class ProcSource
   end
 end
 
-# TODO: handle symbol proc equality
 # TODO: handle eval proc equality?
 # TODO: handle bindings and local variable checks
 # TODO: handle @variables?

@@ -25,8 +25,12 @@ class ProcSource
     other.sexp == sexp_with_parameters_from(other)
   end
 
+  def to_raw_source
+    lambdify_source(proc.to_raw_source)
+  end
+
   def to_source
-    lambda? ? proc.to_source.sub('proc ', '-> ') : proc.to_source
+    lambdify_source(proc.to_source)
   end
 
   alias_method :to_s, :to_source
@@ -65,6 +69,10 @@ class ProcSource
 
   def replace_parameter_references_in(sexp, from, to)
     sexp.gsub(s(:lvar, from), s(:lvar, to))
+  end
+
+  def lambdify_source(source)
+    lambda? ? source.sub('proc ', '-> ') : source
   end
 end
 

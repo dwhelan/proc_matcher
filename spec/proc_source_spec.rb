@@ -23,7 +23,7 @@ describe ProcSource do
   describe 'to_s' do
     it 'should delegate "to_s" to "proc.to_source"' do
       source = ProcSource.new {}
-      expect(source.to_s).to be source.proc.to_source
+      expect(source.to_s).to eq source.proc.to_source
     end
 
     it 'should replace "proc" with "->" for lambdas' do
@@ -35,12 +35,24 @@ describe ProcSource do
   describe 'to_source' do
     it 'should delegate "to_source" to "proc.to_source"' do
       source = ProcSource.new {}
-      expect(source.to_source).to be source.proc.to_source
+      expect(source.to_source).to eq source.proc.to_source
     end
 
     it 'should replace "proc" with "->" for lambdas' do
       source = ProcSource.new -> {}
       expect(source.to_source).to eq source.proc.to_source.sub('proc', '->')
+    end
+  end
+
+  describe 'to_raw_source' do
+    it 'should delegate "to_raw_source" to "proc.to_raw_source"' do
+      source = ProcSource.new {}
+      expect(source.to_raw_source).to eq source.proc.to_raw_source
+    end
+
+    it 'should replace "proc" with "->" for lambdas' do
+      source = ProcSource.new -> {}
+      expect(source.to_raw_source).to eq source.proc.to_raw_source.sub('proc', '->')
     end
   end
 

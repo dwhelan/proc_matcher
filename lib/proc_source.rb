@@ -19,15 +19,6 @@ class ProcSource
     source_equal(other)
   end
 
-  def source_equal(other)
-    return false if other.arity != arity || other.lambda? != lambda? || other.count != count
-    return true if other.sexp_body == sexp_body
-
-    other.sexp == sexp_with_parameters_from(other)
-  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError
-    false
-  end
-
   def to_raw_source
     lambdify(:to_raw_source)
   end
@@ -51,6 +42,15 @@ class ProcSource
 
   def parameters
     sexp[2].sexp_body.to_a
+  end
+
+  def source_equal(other)
+    return false if other.arity != arity || other.lambda? != lambda? || other.count != count
+    return true if other.sexp_body == sexp_body
+
+    other.sexp == sexp_with_parameters_from(other)
+  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError
+    false
   end
 
   private

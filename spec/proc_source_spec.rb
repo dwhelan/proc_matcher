@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 # rubocop:disable Metrics/LineLength, Style/SymbolProc
 describe ProcSource do
   describe 'initialize' do
@@ -16,7 +17,8 @@ describe ProcSource do
     end
 
     it 'should throw if an argument is provided along with a block' do
-      expect { ProcSource.new(Object.new) {} }.to raise_error ArgumentError, 'cannot pass both an argument and a block'
+      proc = proc {}
+      expect { ProcSource.new(proc) {} }.to raise_error ArgumentError, 'cannot pass both an argument and a block'
     end
   end
 
@@ -34,6 +36,11 @@ describe ProcSource do
 
       it "should call 'proc.to_s' for symbol procs" do
         block = proc(&:to_s)
+        expect(ProcSource.new(block).public_send(method)).to eq block.to_s
+      end
+
+      it "should call 'proc.to_s' for procs where source cannot be extract" do
+        block = proc { proc {} }
         expect(ProcSource.new(block).public_send(method)).to eq block.to_s
       end
     end
@@ -115,8 +122,18 @@ describe ProcSource do
       end
 
       specify 'lexically different symbol procs should not be equal' do
-        source1 = ProcSource.new proc(&:to_s)
-        source2 = ProcSource.new proc(&:inspect)
+        source1 = ProcSource.new(&:to_s)
+        source2 = ProcSource.new(&:inspect)
+
+        expect(source1).to_not eq source2
+      end
+    end
+
+    describe 'procs where sources cannot be extracted' do
+      specify 'should not be equal' do
+        proc1   = proc { 1 }; proc2 = proc { 2 }
+        source1 = ProcSource.new proc1
+        source2 = ProcSource.new proc2
 
         expect(source1).to_not eq source2
       end

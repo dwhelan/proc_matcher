@@ -24,11 +24,11 @@ class ProcSource
   end
 
   def to_raw_source
-    lambdify(:to_raw_source)
+    source(:to_raw_source)
   end
 
   def to_source
-    lambdify(:to_source)
+    source(:to_source)
   end
 
   alias_method :to_s, :to_source
@@ -57,7 +57,7 @@ class ProcSource
     else
       other.sexp == sexp_with_parameters_from(other)
     end
-  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError
+  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError, Sourcify::MultipleMatchingProcsPerLineError
     false
   end
 
@@ -88,10 +88,10 @@ class ProcSource
     sexp.gsub(s(:lvar, from), s(:lvar, to))
   end
 
-  def lambdify(method)
-    source = proc.public_send(method)
-    lambda? ? source.sub('proc ', '-> ') : source
-  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError
+  def source(method)
+    proc_source = proc.public_send(method)
+    lambda? ? proc_source.sub('proc ', '-> ') : proc_source
+  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError, Sourcify::MultipleMatchingProcsPerLineError
     proc.to_s
   end
 end

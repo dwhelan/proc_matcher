@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 # rubocop:disable Metrics/LineLength, Style/SymbolProc
 describe ProcSource do
   describe 'initialize' do
@@ -25,23 +24,23 @@ describe ProcSource do
   shared_examples 'string functions' do |method, other = method|
     context method do
       it "should delegate to 'proc.#{other}'" do
-        block = proc {}
-        expect(ProcSource.new(block).public_send(method)).to eq block.public_send(other)
+        prc = proc {}
+        expect(ProcSource.new(prc).public_send(method)).to eq prc.public_send(other)
       end
 
       it "should replace 'proc' with '->' for lambdas" do
-        block = -> {}
-        expect(ProcSource.new(block).public_send(method)).to eq block.public_send(other).sub('proc', '->')
+        prc = -> {}
+        expect(ProcSource.new(prc).public_send(method)).to eq prc.public_send(other).sub('proc', '->')
       end
 
       it "should call 'proc.to_s' for symbol procs" do
-        block = proc(&:to_s)
-        expect(ProcSource.new(block).public_send(method)).to eq block.to_s
+        prc = proc(&:to_s)
+        expect(ProcSource.new(prc).public_send(method)).to eq prc.to_s
       end
 
-      it "should call 'proc.to_s' for procs where source cannot be extract" do
-        block = proc { proc {} }
-        expect(ProcSource.new(block).public_send(method)).to eq block.to_s
+      it "should call 'proc.to_s' for procs when source cannot be extracted" do
+        prc = proc { proc {} }
+        expect(ProcSource.new(prc).public_send(method)).to eq prc.to_s
       end
     end
   end
@@ -131,7 +130,8 @@ describe ProcSource do
 
     describe 'procs where sources cannot be extracted' do
       specify 'should not be equal' do
-        proc1   = proc { 1 }; proc2 = proc { 2 }
+        # rubocop:disable Style/Semicolon
+        proc1   = proc { 1 }; proc2 = proc { 1 }
         source1 = ProcSource.new proc1
         source2 = ProcSource.new proc2
 

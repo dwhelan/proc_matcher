@@ -44,29 +44,28 @@ class ProcSource
     new_sexp = sexp
     other_proc.parameters.each_with_index do |to, index|
       from = parameters[index]
-      new_sexp = rename_parameter(from, to, new_sexp)
+      new_sexp = rename_parameter_in(new_sexp, from, to)
     end
     new_sexp
   end
 
-  def rename_parameter(from, to, sexp)
-    new_sexp = replace_parameter_definition(from, to, sexp)
-    replace_parameter_references(from, to, new_sexp)
+  def rename_parameter_in(sexp, from, to)
+    new_sexp = replace_parameter_definition_in(sexp, from, to)
+    replace_parameter_references_in(new_sexp, from, to)
   end
 
-  def replace_parameter_definition(from, to, sexp)
-    new_sexp = sexp.clone
-    index = parameters.find_index { |parameter| parameter == from }
-    new_sexp[2][index + 1] = to
-    new_sexp
+  def replace_parameter_definition_in(sexp, from, to)
+    sexp.clone.tap do |new_sexp|
+      index = parameters.find_index { |parameter| parameter == from }
+      new_sexp[2][index + 1] = to
+    end
   end
 
-  def replace_parameter_references(from, to, sexp)
+  def replace_parameter_references_in(sexp, from, to)
     sexp.gsub(s(:lvar, from), s(:lvar, to))
   end
 end
 
-# TODO: support symbol procs
 # TODO: add alias for to_source => to_s
 # TODO: add source
 # TODO: handle procs where source extraction fails

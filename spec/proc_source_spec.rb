@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-# rubocop:disable Metrics/LineLength
+# rubocop:disable Metrics/LineLength, Style/SymbolProc
 describe ProcSource do
   describe 'initialize' do
     it 'should allow a Proc to be an argument' do
@@ -67,7 +67,6 @@ describe ProcSource do
       expect(source1).to_not eq source2
     end
 
-    # rubocop:disable Style/SymbolProc
     specify 'should not be equal with a different parameter arity' do
       source1 = ProcSource.new {}
       source2 = ProcSource.new { |a| a.to_s }

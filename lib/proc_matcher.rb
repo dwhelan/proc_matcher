@@ -23,5 +23,7 @@ module RSpec
   end
 end
 
+# TODO: support symbol procs
+# TODO: support procs returned from an eval
 # TODO: split proc equals logic into its own gem
 # TODO: clean up README.md

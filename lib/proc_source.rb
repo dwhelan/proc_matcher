@@ -25,9 +25,11 @@ class ProcSource
     other.sexp == sexp_with_parameters_from(other)
   end
 
-  def to_s
+  def to_source
     lambda? ? proc.to_source.sub('proc ', '-> ') : proc.to_source
   end
+
+  alias_method :to_s, :to_source
 
   protected
 

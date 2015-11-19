@@ -32,6 +32,18 @@ describe ProcSource do
     end
   end
 
+  describe 'to_source' do
+    it 'should delegate "to_source" to "proc.to_source"' do
+      source = ProcSource.new {}
+      expect(source.to_source).to be source.proc.to_source
+    end
+
+    it 'should replace "proc" with "->" for lambdas' do
+      source = ProcSource.new -> {}
+      expect(source.to_source).to eq source.proc.to_source.sub('proc', '->')
+    end
+  end
+
   describe '==' do
     specify 'sames procs should be equal' do
       source = ProcSource.new {}

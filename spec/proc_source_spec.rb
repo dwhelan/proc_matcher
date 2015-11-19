@@ -111,7 +111,7 @@ describe ProcSource do
         expect(source1).to_not eq source2
       end
 
-      specify 'lexically same symbol procs should be equal even when declared within different objects' do
+      specify 'lexically same symbol procs should be equal even when declared within different scopes' do
         object1 = Object.new.tap do |object|
           object.define_singleton_method(:prc) { proc(&:to_s) }
         end

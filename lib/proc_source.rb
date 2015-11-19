@@ -13,10 +13,14 @@ class ProcSource
   end
 
   def ==(other)
-    return true  if other.proc == proc
-    return false if other.arity != arity || other.lambda? != lambda?
-
-    source_equal(other)
+    case
+    when other.proc == proc
+      true
+    when other.arity != arity || other.lambda? != lambda?
+      false
+    else
+      source_equal(other)
+    end
   end
 
   def to_raw_source
@@ -45,10 +49,14 @@ class ProcSource
   end
 
   def source_equal(other)
-    return false if other.arity != arity || other.lambda? != lambda? || other.count != count
-    return true if other.sexp_body == sexp_body
-
-    other.sexp == sexp_with_parameters_from(other)
+    case
+    when other.count != count
+      false
+    when other.sexp_body == sexp_body
+      true
+    else
+      other.sexp == sexp_with_parameters_from(other)
+    end
   rescue Sourcify::CannotHandleCreatedOnTheFlyProcError
     false
   end

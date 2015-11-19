@@ -20,41 +20,28 @@ describe ProcSource do
     end
   end
 
-  describe 'to_s' do
-    it 'should delegate "to_s" to "proc.to_source"' do
-      source = ProcSource.new {}
-      expect(source.to_s).to eq source.proc.to_source
-    end
+  shared_examples 'string functions' do |method, other = method|
+    context method do
+      it "should delegate to 'proc.#{other}'" do
+        block = proc {}
+        expect(ProcSource.new(block).public_send(method)).to eq block.public_send(other)
+      end
 
-    it 'should replace "proc" with "->" for lambdas' do
-      source = ProcSource.new -> {}
-      expect(source.to_s).to eq source.proc.to_source.sub('proc', '->')
+      it "should replace 'proc' with '->' for lambdas" do
+        block = -> {}
+        expect(ProcSource.new(block).public_send(method)).to eq block.public_send(other).sub('proc', '->')
+      end
+
+      it "should call 'proc.to_s' for symbol procs" do
+        block = proc(&:to_s)
+        expect(ProcSource.new(block).public_send(method)).to eq block.to_s
+      end
     end
   end
 
-  describe 'to_source' do
-    it 'should delegate "to_source" to "proc.to_source"' do
-      source = ProcSource.new {}
-      expect(source.to_source).to eq source.proc.to_source
-    end
-
-    it 'should replace "proc" with "->" for lambdas' do
-      source = ProcSource.new -> {}
-      expect(source.to_source).to eq source.proc.to_source.sub('proc', '->')
-    end
-  end
-
-  describe 'to_raw_source' do
-    it 'should delegate "to_raw_source" to "proc.to_raw_source"' do
-      source = ProcSource.new {}
-      expect(source.to_raw_source).to eq source.proc.to_raw_source
-    end
-
-    it 'should replace "proc" with "->" for lambdas' do
-      source = ProcSource.new -> {}
-      expect(source.to_raw_source).to eq source.proc.to_raw_source.sub('proc', '->')
-    end
-  end
+  include_examples 'string functions', :to_s, :to_source
+  include_examples 'string functions', :to_source
+  include_examples 'string functions', :to_raw_source
 
   describe '==' do
     specify 'sames procs should be equal' do
@@ -96,6 +83,13 @@ describe ProcSource do
       source2 = ProcSource.new { |a| a.to_s }
 
       expect(source1).to_not eq source2
+    end
+
+    specify 'same symbol procs should be equal' do
+      block = proc(&:to_s)
+      source = ProcSource.new block
+
+      expect(source).to eq source
     end
   end
 end

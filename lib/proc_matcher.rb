@@ -25,5 +25,6 @@ end
 
 # TODO: support symbol procs
 # TODO: support procs returned from an eval
+# TODO: handle procs where source extraction fails
 # TODO: split proc equals logic into its own gem
 # TODO: clean up README.md

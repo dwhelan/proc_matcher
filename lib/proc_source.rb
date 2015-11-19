@@ -3,8 +3,6 @@ require 'sourcify'
 class ProcSource
   extend Forwardable
 
-  attr_reader :proc
-
   def initialize(proc = nil, &block)
     if proc
       fail ArgumentError, 'cannot pass both an argument and a block' if block
@@ -14,11 +12,8 @@ class ProcSource
     @proc = proc || block
   end
 
-  def sexp
-    @sexp ||= proc.to_sexp
-  end
-
   def ==(other)
+    return true if other.proc == proc
     return false if other.arity != arity || other.lambda? != lambda? || other.count != count
     return true if other.sexp_body == sexp_body
 
@@ -26,19 +21,25 @@ class ProcSource
   end
 
   def to_raw_source
-    lambdify_source(proc.to_raw_source)
+    lambdify(:to_raw_source)
   end
 
   def to_source
-    lambdify_source(proc.to_source)
+    lambdify(:to_source)
   end
 
   alias_method :to_s, :to_source
 
   protected
 
+  attr_reader :proc
+
   def_delegators :proc, :arity, :lambda?
   def_delegators :sexp, :sexp_body, :count
+
+  def sexp
+    @sexp ||= proc.to_sexp
+  end
 
   def parameters
     sexp[2].sexp_body.to_a
@@ -71,14 +72,16 @@ class ProcSource
     sexp.gsub(s(:lvar, from), s(:lvar, to))
   end
 
-  def lambdify_source(source)
+  def lambdify(method)
+    source = proc.public_send(method)
     lambda? ? source.sub('proc ', '-> ') : source
+  rescue Sourcify::CannotHandleCreatedOnTheFlyProcError
+    proc.to_s
   end
 end
 
-# TODO: add alias for to_source => to_s
-# TODO: add source
-# TODO: handle procs where source extraction fails
+# TODO: handle symbol proc equality
+# TODO: handle eval proc equality?
 # TODO: handle bindings and local variable checks
 # TODO: handle @variables?
 # TODO: handle === , eql? & hash see http://commandercoriander.net/blog/2013/05/27/four-types-of-equality-in-ruby/

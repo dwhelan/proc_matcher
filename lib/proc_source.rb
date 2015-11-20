@@ -32,6 +32,7 @@ class ProcSource
   end
 
   alias_method :to_s, :to_source
+  alias_method :inspect, :to_source
 
   protected
 
@@ -96,7 +97,5 @@ class ProcSource
   end
 end
 
-# TODO: handle bindings and local variable checks
-# TODO: handle @variables?
 # TODO: handle === , eql? & hash see http://commandercoriander.net/blog/2013/05/27/four-types-of-equality-in-ruby/
 # TODO: optionally monkey match Proc?

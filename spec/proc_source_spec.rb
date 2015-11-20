@@ -131,12 +131,37 @@ describe ProcSource do
     describe 'procs where sources cannot be extracted' do
       specify 'should not be equal' do
         # rubocop:disable Style/Semicolon
+        #
+        # Source cannot be extracted because the sourcify gem detects multiple procs declared on the same line.
         proc1   = proc { 1 }; proc2 = proc { 1 }
         source1 = ProcSource.new proc1
         source2 = ProcSource.new proc2
 
         expect(source1).to_not eq source2
       end
+    end
+
+    specify 'blocks with different bindings should be equal' do
+      object1 = Class.new do
+        @var = 42
+
+        def meaning
+          proc { @var }
+        end
+      end.new
+
+      object2 = Class.new do
+        @var = 41
+
+        def meaning
+          proc { @var }
+        end
+      end.new
+
+      source1 = ProcSource.new object1.meaning
+      source2 = ProcSource.new object2.meaning
+
+      expect(source1).to eq source2
     end
   end
 end

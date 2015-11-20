@@ -164,4 +164,13 @@ describe ProcSource do
       expect(source1).to eq source2
     end
   end
+
+  describe '===' do
+    specify 'procs with empty code should be equal' do
+      source1 = ProcSource.new {}
+      source2 = ProcSource.new {}
+
+      expect(source1 === source2).to be true
+    end
+  end
 end

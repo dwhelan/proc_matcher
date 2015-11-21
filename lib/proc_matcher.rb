@@ -6,7 +6,7 @@ require 'rspec/matchers'
 module RSpec
   module Matchers
     define(:equal_proc) do
-      match { source_for(actual) == source_for(expected) }
+      match { ProcSource.new(actual) == ProcSource.new(expected) }
 
       description { "equal #{description_of(expected)}" }
 

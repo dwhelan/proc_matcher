@@ -7,6 +7,9 @@ module RSpec
       expect(ProcMatcher::VERSION).not_to be nil
     end
 
+    describe '===', :focus do
+    end
+
     describe 'description' do
       it 'proc with no args should be "equal proc { }"' do
         expect(equal_proc(proc {}).description).to eq 'equal "proc { }"'

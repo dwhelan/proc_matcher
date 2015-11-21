@@ -1,5 +1,26 @@
 require 'sourcify'
 
+class Proc
+  def match(other)
+    ProcSource.new(other) == ProcSource.new(self)
+  end
+
+  def inspect
+    ProcSource.new(self).inspect
+  end
+end
+
+RSpec::Matchers::BuiltIn::Match.class_eval do
+  def description
+    "match #{description_of(expected)}"
+  end
+
+  def description_of(object)
+    super(ProcSource.new(object).to_s)
+  end
+
+end
+
 class ProcSource
   extend Forwardable
 
@@ -97,6 +118,7 @@ class ProcSource
   end
 end
 
-# TODO: convert == to =~
+# TODO: Monkey path Proc =~
+# TODO: Monkey path Proc match()
+# TODO: print (lamba) instead of ->
 # TODO: handle eql? & hash see http://commandercoriander.net/blog/2013/05/27/four-types-of-equality-in-ruby/
-# TODO: optionally monkey match Proc?

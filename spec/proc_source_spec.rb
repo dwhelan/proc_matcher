@@ -165,6 +165,7 @@ describe ProcSource do
     end
   end
 
+  # rubocop:disable Style/CaseEquality
   describe '===' do
     specify 'procs with empty code should be equal' do
       source1 = ProcSource.new {}

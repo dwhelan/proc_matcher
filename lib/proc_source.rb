@@ -97,5 +97,6 @@ class ProcSource
   end
 end
 
-# TODO: handle === , eql? & hash see http://commandercoriander.net/blog/2013/05/27/four-types-of-equality-in-ruby/
+# TODO: convert == to =~
+# TODO: handle eql? & hash see http://commandercoriander.net/blog/2013/05/27/four-types-of-equality-in-ruby/
 # TODO: optionally monkey match Proc?

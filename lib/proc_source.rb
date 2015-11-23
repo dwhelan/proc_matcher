@@ -1,24 +1,13 @@
 require 'sourcify'
 
-class Proc
-  def match(other)
-    ProcSource.new(other) == ProcSource.new(self)
-  end
-
-  def inspect
-    ProcSource.new(self).inspect
-  end
-end
-
 RSpec::Matchers::BuiltIn::Match.class_eval do
   def description
     "match #{description_of(expected)}"
   end
 
   def description_of(object)
-    super(ProcSource.new(object).to_s)
+    super(ProcSource.new(object).inspect)
   end
-
 end
 
 class ProcSource

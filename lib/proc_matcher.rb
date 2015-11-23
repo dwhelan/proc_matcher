@@ -1,7 +1,7 @@
 require 'proc_matcher/version'
-require_relative 'proc_source.rb'
 
 require 'rspec/matchers'
+require 'proc_extensions'
 
 module RSpec
   module Matchers

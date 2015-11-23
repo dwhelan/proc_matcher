@@ -7,16 +7,13 @@ module RSpec
       expect(ProcMatcher::VERSION).not_to be nil
     end
 
-    describe '===', :focus do
-    end
-
     describe 'description' do
       it 'proc with no args should be "equal proc { }"' do
         expect(equal_proc(proc {}).description).to eq 'equal "proc { }"'
       end
 
       it 'lamda with no args should be "equal -> { }"' do
-        expect(equal_proc(-> {}).description).to eq 'equal "-> { }"'
+        expect(equal_proc(-> {}).description).to eq 'equal "lambda { }"'
       end
 
       it 'proc with arguments "arg" should be "equal proc { |arg| }"' do
@@ -44,14 +41,14 @@ module RSpec
         lambda = -> {}
         proc   = proc {}
 
-        expect { expect(lambda).to equal_proc(proc) }.to raise_error(Expectations::ExpectationNotMetError, 'expected "-> { }" to equal "proc { }"')
+        expect { expect(lambda).to equal_proc(proc) }.to raise_error(Expectations::ExpectationNotMetError, 'expected "lambda { }" to equal "proc { }"')
       end
 
       it 'when expected is a proc but is a lambda' do
         lambda = -> {}
         proc   = proc {}
 
-        expect { expect(proc).to equal_proc(lambda) } .to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" to equal "-> { }"')
+        expect { expect(proc).to equal_proc(lambda) } .to raise_error(Expectations::ExpectationNotMetError, 'expected "proc { }" to equal "lambda { }"')
       end
     end
 

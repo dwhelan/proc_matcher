@@ -15,11 +15,11 @@ module RSpec
       expect(have_same_source_as(proc1).ignoring_parameter_names.description).to eq 'have same source as "proc { }" ignoring parameter names'
     end
 
-    it 'the same procs should be equal' do
+    it 'the same procs should have the same source' do
       expect(proc1).to have_same_source_as proc1
     end
 
-    it 'procs with the same source should be equal' do
+    it 'procs with the same declarations source should have the same source' do
       expect(proc1).to have_same_source_as proc {}
     end
 
@@ -27,17 +27,17 @@ module RSpec
       expect(proc1).to_not have_same_source_as proc { 42 }
     end
 
-    it 'lambdas should not be equal procs' do
+    it 'lambdas should not have the same source as procs' do
       expect(proc1).to_not have_same_source_as -> {}
     end
 
-    it 'procs with same effective source but different parameters should not be equal' do
+    it 'procs with different parameters only should by default not have the same source' do
       proc1 = proc { |a| a.to_s }
 
       expect(proc1).to_not have_same_source_as proc { |b| b.to_s }
     end
 
-    it 'procs with same effective source but different parameters should not be equal' do
+    it 'ignoring_parameter_names should allow procs with same effective source but different parameters to have the same source' do
       proc1 = proc { |a| a.to_s }
 
       expect(proc1).to have_same_source_as(proc { |b| b.to_s }).ignoring_parameter_names

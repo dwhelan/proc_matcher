@@ -1,12 +1,11 @@
+[![Gem Version](https://badge.fury.io/rb/proc_matcher.png)](http://badge.fury.io/rb/proc_matcher)
+[![Build Status](https://travis-ci.org/dwhelan/proc_matcher.png?branch=master)](https://travis-ci.org/dwhelan/proc_matcher)
+[![Code Climate](https://codeclimate.com/github/dwhelan/proc_matcher/badges/gpa.svg)](https://codeclimate.com/github/dwhelan/proc_matcher)
+[![Coverage Status](https://coveralls.io/repos/dwhelan/proc_matcher/badge.svg?branch=master&service=github)](https://coveralls.io/github/dwhelan/proc_matcher?branch=master)
+
 # ProcMatcher
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/proc_matcher`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
-Does not handle:
- * on the fly procs like &:to_s
- * procs returned from an eval like eval ("{}")
+A matcher for testing proc and lambda equivalance.
 
 ## Installation
 
@@ -26,7 +25,58 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Add this line to your `spec_helper.rb` file:
+
+```ruby
+include 'proc_matcher'
+```
+
+You will now have access to a matcher called `has_same_source_as` which
+allows you to check that `procs's` have the source code.
+
+```ruby
+require 'spec_helper'
+
+describe 'have_same_source_as' do
+  let(:proc1) do
+    proc {}
+  end
+
+  it 'the same procs should be equal' do
+    expect(proc1).to have_same_source_as proc1
+  end
+
+  it 'lambdas should not have the same source as procs' do
+    expect(proc1).to_not have_same_source_as -> {}
+  end
+
+  it 'procs with different parameters only should by default not have the same source' do
+    proc1 = proc { |a| a.to_s }
+
+    expect(proc1).to_not have_same_source_as proc { |b| b.to_s }
+  end
+end
+```
+
+The `ignoring_parameter_names` allows blocks to be considered to have the same
+source if they only differ in their parameter names:
+
+```ruby
+require 'spec_helper'
+
+describe 'ignoring_parameter_names' do
+  it 'ignoring_parameter_names should allow procs with same effective source but different parameters to have the same source' do
+    proc1 = proc { |a| a.to_s }
+
+    expect(proc1).to have_same_source_as(proc { |b| b.to_s }).ignoring_parameter_names
+  end
+end
+```
+
+*Note* this matcher depends the `sourcify` gem to extact the source code.
+This source extraction only works if:
+ * the proc is the only proc declared on the same line
+ * the proc was not created via an `eval`
 
 ## Development
 
@@ -36,10 +86,9 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/proc_matcher. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/dwhelan/proc_matcher. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
 
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-

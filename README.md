@@ -78,6 +78,13 @@ This source extraction only works if:
  * the proc is the only proc declared on the same line
  * the proc was not created via an `eval`
 
+## Ruby Versions Supported
+
+* 1.9.3
+* 2.0
+* 2.1
+* 2.2
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
